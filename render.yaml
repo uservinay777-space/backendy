@@ -29,5 +29,11 @@ services:
         value: production
       - key: GROQ_API_KEY
         sync: false
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: TTS_PROVIDER
+        value: sarvam
       - key: MONGODB_URI
         sync: false
