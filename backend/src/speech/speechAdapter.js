@@ -45,117 +45,75 @@ class SpeechAdapter {
    *   error?: string
    * }>}
    */
-  async generateSpeech({ sessionId, turnId, text, language = 'hinglish' }) {
+  async generateSpeech({ sessionId, turnId, text, language = 'hinglish', provider = null, voiceId = null, modelId = null }) {
     const effectiveTurnId = turnId || `turn_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
     const abortController = new AbortController();
 
     // Register with GhostBarge buffer manager
     audioBufferManager.registerTurn(sessionId, effectiveTurnId, abortController);
 
-    // Verify provider configuration
-    const configCheck = ttsService.checkConfiguration();
-    if (!configCheck.isConfigured) {
-      audioBufferManager.completeTurn(effectiveTurnId);
-      return {
-        success: false,
-        sessionId,
-        turnId: effectiveTurnId,
-        audioBuffer: Buffer.alloc(0),
-        audioMimeType: 'audio/wav',
-        interrupted: false,
-        provider: configCheck.provider,
-        error: configCheck.error,
-        metrics: {
-          ttsApiLatencyMs: 0,
-          timeToFirstAudioChunkMs: 0,
-          totalAudioGenerationMs: 0,
-          totalBytes: 0,
-          chunkCount: 0,
-        },
-      };
-    }
-
-    const audioChunks = [];
-    let isInterrupted = false;
-    let finalMetrics = {
-      ttsApiLatencyMs: 0,
-      timeToFirstAudioChunkMs: 0,
-      totalAudioGenerationMs: 0,
-      totalBytes: 0,
-      chunkCount: 0,
-    };
-
-    let detectedMimeType = 'audio/wav';
-
     try {
-      const stream = ttsService.synthesizeStream({
+      const result = await ttsService.synthesize({
         text,
         turnId: effectiveTurnId,
+        language,
+        provider,
+        voiceId,
+        modelId,
         signal: abortController.signal,
       });
 
-      for await (const chunk of stream) {
-        // GhostBarge Interruption Check
-        if (audioBufferManager.isCancelled(effectiveTurnId)) {
-          isInterrupted = true;
-          break;
-        }
-
-        if (chunk.audioMimeType) {
-          detectedMimeType = chunk.audioMimeType;
-        }
-
-        if (chunk.data && chunk.data.length > 0) {
-          audioChunks.push(chunk.data);
-        }
-
-        if (chunk.metrics) {
-          finalMetrics = {
-            ...finalMetrics,
-            ...chunk.metrics,
-            chunkCount: audioChunks.length,
-          };
-        }
-      }
-    } catch (err) {
-      if (err.name === 'AbortError' || audioBufferManager.isCancelled(effectiveTurnId)) {
-        isInterrupted = true;
-      } else {
-        console.error(`[SpeechAdapter] Error generating speech:`, err.message);
-        audioBufferManager.completeTurn(effectiveTurnId);
+      if (audioBufferManager.isCancelled(effectiveTurnId)) {
         return {
           success: false,
           sessionId,
           turnId: effectiveTurnId,
           audioBuffer: Buffer.alloc(0),
-          audioMimeType: detectedMimeType,
-          interrupted: false,
-          error: err.message,
-          metrics: finalMetrics,
+          audioMimeType: 'audio/wav',
+          interrupted: true,
+          provider: result.provider,
+          metrics: result.metrics,
         };
       }
+
+      const resObj = {
+        success: Boolean(result.success),
+        sessionId,
+        turnId: effectiveTurnId,
+        audioBuffer: result.audioBuffer || Buffer.alloc(0),
+        audioMimeType: result.audioMimeType || 'audio/wav',
+        isFallback: Boolean(result.isFallback),
+        fallbackText: result.fallbackText || text,
+        interrupted: Boolean(result.interrupted),
+        provider: result.provider,
+        metrics: result.metrics || {},
+      };
+
+      this._recordTelemetry(resObj);
+      return resObj;
+    } catch (err) {
+      console.error(`[SpeechAdapter] Error generating speech:`, err.message);
+      return {
+        success: true,
+        sessionId,
+        turnId: effectiveTurnId,
+        isFallback: true,
+        fallbackText: text,
+        audioBuffer: Buffer.alloc(0),
+        audioMimeType: null,
+        interrupted: false,
+        provider: 'browser_speech',
+        error: err.message,
+        metrics: {
+          ttsApiLatencyMs: 0,
+          timeToFirstAudioChunkMs: 0,
+          totalAudioGenerationMs: 0,
+          totalBytes: 0,
+        },
+      };
     } finally {
       audioBufferManager.completeTurn(effectiveTurnId);
     }
-
-    const combinedBuffer = Buffer.concat(audioChunks);
-
-    const result = {
-      success: !isInterrupted && combinedBuffer.length > 0,
-      sessionId,
-      turnId: effectiveTurnId,
-      audioBuffer: combinedBuffer,
-      audioMimeType: detectedMimeType,
-      interrupted: isInterrupted,
-      provider: ttsService.getActiveProvider(),
-      metrics: {
-        ...finalMetrics,
-        totalBytes: combinedBuffer.length,
-      },
-    };
-
-    this._recordTelemetry(result);
-    return result;
   }
 
   /**

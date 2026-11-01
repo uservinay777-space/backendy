@@ -405,38 +405,52 @@ async function speakResponse(text, turnId = null) {
         return;
       }
 
-      if (data.success && data.audioBase64 && !data.isMock) {
-        const mime = data.audioMimeType || 'audio/wav';
-        const audioSrc = `data:${mime};base64,${data.audioBase64}`;
-        const player = new Audio(audioSrc);
-        state.audioPlayer = player;
-        state.isSpeaking = true;
+      if (data.success && data.audioBase64 && data.audioBase64.length > 200 && !data.isFallback && !data.isMock) {
+        const mime = data.audioMimeType || (data.provider === 'elevenlabs' ? 'audio/mpeg' : 'audio/wav');
+        try {
+          const byteCharacters = atob(data.audioBase64);
+          const byteNumbers = new Uint8Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const blob = new Blob([byteNumbers], { type: mime });
+          const audioUrl = URL.createObjectURL(blob);
+          const player = new Audio(audioUrl);
+          state.audioPlayer = player;
+          state.isSpeaking = true;
 
-        const ttfb = data.metrics?.timeToFirstAudioChunkMs || Math.round(performance.now() - startTts);
-        const engineLabel = data.provider === 'sarvam' ? 'Sarvam AI (Bulbul v4)' : 'ElevenLabs TTS';
-        setVoiceState(`Speaking (${engineLabel} • ${ttfb}ms) • Tap "Halt" to interrupt`, 'speaking');
+          const ttfb = data.metrics?.timeToFirstAudioChunkMs || Math.round(performance.now() - startTts);
+          const engineLabel = data.provider === 'sarvam' ? 'Sarvam AI (Bulbul v4 Flash)' : 'ElevenLabs (Flash v2.5)';
+          setVoiceState(`Speaking (${engineLabel} • ${ttfb}ms) • Tap "Halt Audio" to interrupt`, 'speaking');
 
-        player.onended = () => {
-          state.isSpeaking = false;
-          state.audioPlayer = null;
-          setVoiceState('Ready to listen • Tap mic or speak', 'idle');
-        };
+          player.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            state.isSpeaking = false;
+            state.audioPlayer = null;
+            setVoiceState('Ready to listen • Tap mic or speak', 'idle');
+          };
 
-        player.onerror = (e) => {
-          console.warn('[Audio Player] Audio decode failed, falling back to Browser Voice:', e);
-          state.isSpeaking = false;
-          state.audioPlayer = null;
-          speakBrowserWebSpeech(text);
-        };
+          player.onerror = (e) => {
+            URL.revokeObjectURL(audioUrl);
+            console.warn('[Audio Player] Audio decode failed, falling back to Browser Voice:', e);
+            state.isSpeaking = false;
+            state.audioPlayer = null;
+            speakBrowserWebSpeech(data.fallbackText || text);
+          };
 
-        player.play().catch((e) => {
-          console.warn('[Audio Player] Playback blocked by browser autoplay, falling back to Browser Voice:', e);
-          speakBrowserWebSpeech(text);
-        });
-        return;
+          player.play().catch((e) => {
+            console.warn('[Audio Player] Playback blocked by browser autoplay, falling back to Browser Voice:', e);
+            speakBrowserWebSpeech(data.fallbackText || text);
+          });
+          return;
+        } catch (decodeErr) {
+          console.warn('[Audio Player] Blob creation error, falling back:', decodeErr);
+          speakBrowserWebSpeech(data.fallbackText || text);
+          return;
+        }
       } else {
-        // Fallback to browser voice
-        speakBrowserWebSpeech(text);
+        // Fallback to high-quality browser voice
+        speakBrowserWebSpeech(data.fallbackText || text);
         return;
       }
     } catch (err) {

@@ -41,16 +41,19 @@ const config = {
     timeoutMs: parseInt(process.env.SARVAM_TIMEOUT_MS, 10) || 5000,
   },
 
-  // ElevenLabs Configuration (Optional Voice / TTS)
+  // ElevenLabs Configuration (Natural Conversational Voice)
   elevenlabs: {
-    apiKey: process.env.ELEVENLABS_API_KEY || '',
+    apiKey: process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY || '',
     modelId: process.env.ELEVENLABS_MODEL_ID || 'eleven_flash_v2_5',
-    voiceId: process.env.ELEVENLABS_VOICE_ID || 'pNInz6obpgDQGcFmaJgB', // Adam - Deep Male Voice
-    isConfigured: Boolean(process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_API_KEY.trim()),
+    voiceId: process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM', // Rachel - Natural Conversational Voice
+    isConfigured: Boolean((process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY) && (process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY).trim()),
     optimizeLatency: parseInt(process.env.ELEVENLABS_OPTIMIZE_LATENCY, 10) || 3,
-    stability: parseFloat(process.env.ELEVENLABS_STABILITY) || 0.5,
+    stability: parseFloat(process.env.ELEVENLABS_STABILITY) || 0.40,
     similarityBoost: parseFloat(process.env.ELEVENLABS_SIMILARITY) || 0.75,
-    timeoutMs: parseInt(process.env.TTS_TIMEOUT_MS, 10) || 5000,
+    style: parseFloat(process.env.ELEVENLABS_STYLE) || 0.10,
+    useSpeakerBoost: true,
+    speed: parseFloat(process.env.ELEVENLABS_SPEED) || 1.0,
+    timeoutMs: parseInt(process.env.TTS_TIMEOUT_MS, 10) || 6000,
   },
 
   // TTS Provider Selection

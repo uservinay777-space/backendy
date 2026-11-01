@@ -14,8 +14,10 @@ class ElevenLabsTTS {
     this.voiceId = config.elevenlabs.voiceId || '21m00Tcm4TlvDq8ikWAM';
     this.modelId = config.elevenlabs.modelId || 'eleven_flash_v2_5';
     this.optimizeLatency = config.elevenlabs.optimizeLatency || 3;
-    this.stability = config.elevenlabs.stability || 0.5;
+    this.stability = config.elevenlabs.stability || 0.40;
     this.similarityBoost = config.elevenlabs.similarityBoost || 0.75;
+    this.style = config.elevenlabs.style || 0.10;
+    this.speed = config.elevenlabs.speed || 1.0;
   }
 
   /**
@@ -23,10 +25,12 @@ class ElevenLabsTTS {
    * @param {Object} params
    * @param {string} params.text
    * @param {string} params.turnId
+   * @param {string} [params.voiceId]
+   * @param {string} [params.modelId]
    * @param {AbortSignal} [params.signal]
    * @returns {AsyncGenerator<Object>}
    */
-  async *synthesizeStream({ text, turnId, signal }) {
+  async *synthesizeStream({ text, turnId, voiceId, modelId, signal }) {
     const startTime = performance.now();
 
     if (!config.elevenlabs.isConfigured) {
@@ -35,8 +39,10 @@ class ElevenLabsTTS {
       );
     }
 
+    const effectiveVoiceId = voiceId || this.voiceId;
+    const effectiveModelId = modelId || this.modelId;
     const normalizedText = normalizeForSpeech(text);
-    const endpoint = `https://api.elevenlabs.io/v1/text-to-speech/${this.voiceId}/stream?optimize_streaming_latency=${this.optimizeLatency}`;
+    const endpoint = `https://api.elevenlabs.io/v1/text-to-speech/${effectiveVoiceId}/stream?optimize_streaming_latency=${this.optimizeLatency}&output_format=mp3_44100_128`;
 
     let firstChunkTime = null;
     let apiLatency = null;
@@ -53,11 +59,13 @@ class ElevenLabsTTS {
         },
         body: JSON.stringify({
           text: normalizedText,
-          model_id: this.modelId,
+          model_id: effectiveModelId,
           voice_settings: {
             stability: this.stability,
             similarity_boost: this.similarityBoost,
+            style: this.style,
             use_speaker_boost: true,
+            speed: this.speed,
           },
         }),
         signal,
@@ -137,13 +145,13 @@ class ElevenLabsTTS {
    * @param {Object} params
    * @returns {Promise<Object>}
    */
-  async synthesize({ text, turnId, signal }) {
+  async synthesize({ text, turnId, voiceId, modelId, signal }) {
     const chunks = [];
     let finalMetrics = {};
     let isInterrupted = false;
 
     try {
-      for await (const chunk of this.synthesizeStream({ text, turnId, signal })) {
+      for await (const chunk of this.synthesizeStream({ text, turnId, voiceId, modelId, signal })) {
         if (chunk.data && chunk.data.length > 0) {
           chunks.push(chunk.data);
         }

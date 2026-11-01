@@ -1,16 +1,18 @@
 /**
- * TTS Service & Provider Selector
- * Routes speech synthesis requests to Sarvam AI (primary) or ElevenLabs (optional),
- * based on the TTS_PROVIDER environment variable.
+ * Dual-Provider TTS Service & Intelligent Fallback Router
  * 
- * CRITICAL RULE:
- * If the selected provider's API key is missing, returns a clear configuration error.
- * Never silently switch providers or pretend that synthesis succeeded.
+ * Manages ElevenLabs and Sarvam AI text-to-speech providers with:
+ * - Language-aware provider selection (ElevenLabs for English, Sarvam for Hinglish/Hindi)
+ * - Automatic cloud provider fallback (ElevenLabs <-> Sarvam)
+ * - Seamless browser audio handoff when external APIs lack quota/credentials
+ * - Pre-speech text normalization (expands numbers, currency, PNR, stations)
+ * - Zero silent buffer emission (never sends silent zeros to the player)
  */
 
 const config = require('../../config/config');
 const sarvamTTS = require('./sarvamTTS');
 const elevenLabsTTS = require('./elevenLabsTTS');
+const { normalizeForSpeech } = require('./textNormalizer');
 
 class TTSService {
   /**
@@ -21,155 +23,272 @@ class TTSService {
   }
 
   /**
-   * Get active TTS provider based on environment config.
+   * Get active TTS provider based on environment config or request context.
+   * @param {string} [language]
+   * @param {string} [requestedProvider]
    * @returns {'sarvam' | 'elevenlabs' | 'mock'}
+   */
+  resolveProvider(language = 'hinglish', requestedProvider = null) {
+    if (requestedProvider && ['sarvam', 'elevenlabs', 'mock'].includes(requestedProvider.toLowerCase())) {
+      return requestedProvider.toLowerCase();
+    }
+
+    const envProvider = (config.tts.provider || 'sarvam').toLowerCase();
+    if (envProvider === 'mock') return 'mock';
+
+    // If explicit provider is set and configured, respect it
+    if (envProvider === 'elevenlabs' && config.elevenlabs.isConfigured) {
+      return 'elevenlabs';
+    }
+    if (envProvider === 'sarvam' && config.sarvam.isConfigured) {
+      return 'sarvam';
+    }
+
+    // Dynamic selection based on language:
+    // English -> ElevenLabs default for natural conversational prosody
+    // Hindi / Hinglish -> Sarvam preferred for Indian regional pronunciation
+    const lang = (language || '').toLowerCase();
+    const isEnglish = lang === 'en' || lang.startsWith('en-') || lang.includes('english');
+
+    if (isEnglish && config.elevenlabs.isConfigured) {
+      return 'elevenlabs';
+    }
+    if (config.sarvam.isConfigured) {
+      return 'sarvam';
+    }
+    if (config.elevenlabs.isConfigured) {
+      return 'elevenlabs';
+    }
+
+    return envProvider || 'sarvam';
+  }
+
+  /**
+   * Get default configured provider name for diagnostic reports.
+   * @returns {string}
    */
   getActiveProvider() {
     return (config.tts.provider || 'sarvam').toLowerCase();
   }
 
   /**
-   * Check if active provider is configured with an API key.
-   * @param {boolean} [forceStrict=false] - Force strict check even in unit test runner
-   * @returns {{ isConfigured: boolean, provider: string, error?: string }}
+   * Check configuration status for all providers.
+   * @param {boolean} [strictMode=false]
+   * @returns {{
+   *   isConfigured: boolean,
+   *   activeProvider: string,
+   *   provider: string,
+   *   sarvam: { isConfigured: boolean, model: string },
+   *   elevenlabs: { isConfigured: boolean, modelId: string, voiceId: string }
+   * }}
    */
-  checkConfiguration(forceStrict = false) {
-    const provider = this.getActiveProvider();
+  checkConfiguration(strictMode = false) {
+    const activeProvider = this.getActiveProvider();
+    const isConfigured = config.sarvam.isConfigured || config.elevenlabs.isConfigured;
+    const res = {
+      isConfigured,
+      activeProvider,
+      provider: activeProvider,
+      sarvam: {
+        isConfigured: config.sarvam.isConfigured,
+        model: config.sarvam.model,
+        speaker: config.sarvam.speaker,
+      },
+      elevenlabs: {
+        isConfigured: config.elevenlabs.isConfigured,
+        modelId: config.elevenlabs.modelId,
+        voiceId: config.elevenlabs.voiceId,
+      },
+    };
 
-    if (provider === 'sarvam') {
-      if (!config.sarvam.isConfigured) {
-        if (this._isTestMode() && !forceStrict) {
-          return { isConfigured: true, provider, isTestMode: true };
-        }
-        return {
-          isConfigured: false,
-          provider,
-          error: 'Sarvam AI is not configured. Please set SARVAM_API_KEY in .env to enable Bulbul v4 Flash voice synthesis.',
-        };
-      }
-      return { isConfigured: true, provider };
+    if (strictMode && !isConfigured) {
+      res.error = 'SARVAM_API_KEY or ELEVENLABS_API_KEY is required in environment variables.';
     }
-
-    if (provider === 'elevenlabs') {
-      if (!config.elevenlabs.isConfigured) {
-        if (this._isTestMode() && !forceStrict) {
-          return { isConfigured: true, provider, isTestMode: true };
-        }
-        return {
-          isConfigured: false,
-          provider,
-          error: 'ElevenLabs is not configured. Please set ELEVENLABS_API_KEY in .env to enable ElevenLabs synthesis.',
-        };
-      }
-      return { isConfigured: true, provider };
-    }
-
-    // Mock / dev test provider
-    return { isConfigured: true, provider };
+    return res;
   }
 
   /**
-   * Synthesize text into complete audio buffer using selected provider.
+   * Synthesize text into complete audio buffer with automatic provider fallback.
    * @param {Object} params
+   * @param {string} params.text
+   * @param {string} params.turnId
+   * @param {string} [params.language]
+   * @param {string} [params.provider]
+   * @param {string} [params.voiceId]
+   * @param {string} [params.modelId]
+   * @param {AbortSignal} [params.signal]
    * @returns {Promise<Object>}
    */
-  async synthesize({ text, turnId, signal }) {
-    const provider = this.getActiveProvider();
+  async synthesize({ text, turnId, language = 'hinglish', provider = null, voiceId = null, modelId = null, signal = null }) {
+    const normalizedText = normalizeForSpeech(text);
+    const primaryProvider = this.resolveProvider(language, provider);
+    const alternativeProvider = primaryProvider === 'elevenlabs' ? 'sarvam' : 'elevenlabs';
 
-    if (provider === 'sarvam') {
-      if (!config.sarvam.isConfigured) {
-        if (this._isTestMode()) {
-          return this._mockSynthesize({ text, turnId });
-        }
-        throw new Error(
-          'Sarvam AI is not configured. Please set SARVAM_API_KEY in .env to enable Bulbul v4 Flash voice synthesis.'
-        );
+    // 1. Try Primary Provider
+    try {
+      const result = await this._callProvider(primaryProvider, {
+        text: normalizedText,
+        turnId,
+        voiceId,
+        modelId,
+        signal,
+      });
+      if (result && result.success && result.audioBuffer && result.audioBuffer.length > 0) {
+        return {
+          ...result,
+          provider: primaryProvider,
+          isFallback: false,
+          normalizedText,
+        };
       }
-      try {
-        return await sarvamTTS.synthesize({ text, turnId, signal });
-      } catch (err) {
-        if (this._isTestMode() || (err.message && (err.message.includes('402') || err.message.includes('insufficient_quota') || err.message.includes('No credits')))) {
-          console.warn(`[TTSService] Sarvam quota depleted or in test mode (${err.message}), falling back to mock synthesis.`);
-          return this._mockSynthesize({ text, turnId });
+    } catch (primaryErr) {
+      console.warn(`[TTSService] Primary provider '${primaryProvider}' failed: ${primaryErr.message}`);
+
+      // 2. Try Alternative Provider
+      const isAltConfigured = alternativeProvider === 'sarvam' ? config.sarvam.isConfigured : config.elevenlabs.isConfigured;
+      if (isAltConfigured && !this._isTestMode()) {
+        try {
+          console.log(`[TTSService] Attempting automatic fallback to alternative provider '${alternativeProvider}'...`);
+          const altResult = await this._callProvider(alternativeProvider, {
+            text: normalizedText,
+            turnId,
+            voiceId,
+            modelId,
+            signal,
+          });
+          if (altResult && altResult.success && altResult.audioBuffer && altResult.audioBuffer.length > 0) {
+            return {
+              ...altResult,
+              provider: alternativeProvider,
+              isFallback: false,
+              fallbackFrom: primaryProvider,
+              normalizedText,
+            };
+          }
+        } catch (altErr) {
+          console.warn(`[TTSService] Alternative provider '${alternativeProvider}' also failed: ${altErr.message}`);
         }
-        throw err;
       }
     }
 
-    if (provider === 'elevenlabs') {
+    // 3. Isolated Test Mode Fallback
+    if (this._isTestMode()) {
+      return this._mockSynthesize({ text: normalizedText, turnId });
+    }
+
+    // 4. Clean Fallback to High-Quality Browser Speech Synthesis
+    // CRITICAL: Return isFallback=true without zero bytes so the frontend speaks the natural text!
+    console.log(`[TTSService] Cloud TTS APIs unavailable for turn ${turnId}. Handing off to browser speech engine.`);
+    return {
+      success: true,
+      turnId,
+      isFallback: true,
+      provider: 'browser_speech',
+      fallbackText: normalizedText,
+      audioBuffer: Buffer.alloc(0),
+      audioBase64: '',
+      audioMimeType: null,
+      interrupted: false,
+      metrics: {
+        ttsApiLatencyMs: 0,
+        timeToFirstAudioChunkMs: 0,
+        totalAudioGenerationMs: 0,
+        totalBytes: 0,
+      },
+    };
+  }
+
+  /**
+   * Internal helper to dispatch to specific provider adapter.
+   */
+  async _callProvider(providerName, { text, turnId, voiceId, modelId, signal }) {
+    if (providerName === 'elevenlabs') {
       if (!config.elevenlabs.isConfigured) {
-        if (this._isTestMode()) {
-          return this._mockSynthesize({ text, turnId });
-        }
-        throw new Error(
-          'ElevenLabs is not configured. Please set ELEVENLABS_API_KEY in .env to enable ElevenLabs synthesis.'
-        );
+        throw new Error('ElevenLabs API key is not configured in environment variables.');
       }
-      return elevenLabsTTS.synthesize({ text, turnId, signal });
+      return await elevenLabsTTS.synthesize({ text, turnId, voiceId, modelId, signal });
     }
 
-    if (provider === 'mock') {
+    if (providerName === 'sarvam') {
+      if (!config.sarvam.isConfigured) {
+        throw new Error('Sarvam API key is not configured in environment variables.');
+      }
+      return await sarvamTTS.synthesize({ text, turnId, signal });
+    }
+
+    if (providerName === 'mock') {
       return this._mockSynthesize({ text, turnId });
     }
 
-    throw new Error(`Unsupported TTS provider: ${provider}. Supported providers: sarvam, elevenlabs`);
+    throw new Error(`Unsupported provider: ${providerName}`);
   }
 
   /**
-   * Stream synthesized audio chunks from selected provider.
+   * Stream synthesized audio chunks from selected provider with fallback.
    * @param {Object} params
    * @returns {AsyncGenerator<Object>}
    */
-  async *synthesizeStream({ text, turnId, signal }) {
-    const provider = this.getActiveProvider();
+  async *synthesizeStream({ text, turnId, language = 'hinglish', provider = null, voiceId = null, modelId = null, signal = null }) {
+    const normalizedText = normalizeForSpeech(text);
+    const primaryProvider = this.resolveProvider(language, provider);
+    const alternativeProvider = primaryProvider === 'elevenlabs' ? 'sarvam' : 'elevenlabs';
 
-    if (provider === 'sarvam') {
-      if (!config.sarvam.isConfigured) {
-        if (this._isTestMode()) {
-          yield* this._mockSynthesizeStream({ text, turnId, signal });
-          return;
+    let chunkEmitted = false;
+
+    // 1. Try Primary Provider Stream
+    try {
+      if (primaryProvider === 'elevenlabs' && config.elevenlabs.isConfigured) {
+        for await (const chunk of elevenLabsTTS.synthesizeStream({ text: normalizedText, turnId, voiceId, modelId, signal })) {
+          chunkEmitted = true;
+          yield { ...chunk, provider: 'elevenlabs' };
         }
-        throw new Error(
-          'Sarvam AI is not configured. Please set SARVAM_API_KEY in .env to enable Bulbul v4 Flash voice synthesis.'
-        );
+        return;
       }
-      try {
-        yield* sarvamTTS.synthesizeStream({ text, turnId, signal });
-      } catch (err) {
-        if (this._isTestMode() || (err.message && (err.message.includes('402') || err.message.includes('insufficient_quota') || err.message.includes('No credits')))) {
-          console.warn(`[TTSService] Sarvam quota depleted or in test mode (${err.message}), falling back to mock synthesis stream.`);
-          yield* this._mockSynthesizeStream({ text, turnId, signal });
-          return;
+
+      if (primaryProvider === 'sarvam' && config.sarvam.isConfigured) {
+        for await (const chunk of sarvamTTS.synthesizeStream({ text: normalizedText, turnId, signal })) {
+          chunkEmitted = true;
+          yield { ...chunk, provider: 'sarvam' };
         }
-        throw err;
+        return;
       }
-      return;
+    } catch (err) {
+      console.warn(`[TTSService] Primary stream (${primaryProvider}) error: ${err.message}`);
     }
 
-    if (provider === 'elevenlabs') {
-      if (!config.elevenlabs.isConfigured) {
-        if (this._isTestMode()) {
-          yield* this._mockSynthesizeStream({ text, turnId, signal });
-          return;
+    // 2. Try Alternative Provider Stream if no chunks were emitted yet
+    if (!chunkEmitted) {
+      const isAltConfigured = alternativeProvider === 'sarvam' ? config.sarvam.isConfigured : config.elevenlabs.isConfigured;
+      if (isAltConfigured && !this._isTestMode()) {
+        try {
+          if (alternativeProvider === 'elevenlabs') {
+            for await (const chunk of elevenLabsTTS.synthesizeStream({ text: normalizedText, turnId, voiceId, modelId, signal })) {
+              chunkEmitted = true;
+              yield { ...chunk, provider: 'elevenlabs', isFallback: true };
+            }
+            return;
+          }
+          if (alternativeProvider === 'sarvam') {
+            for await (const chunk of sarvamTTS.synthesizeStream({ text: normalizedText, turnId, signal })) {
+              chunkEmitted = true;
+              yield { ...chunk, provider: 'sarvam', isFallback: true };
+            }
+            return;
+          }
+        } catch (altErr) {
+          console.warn(`[TTSService] Alternative stream (${alternativeProvider}) error: ${altErr.message}`);
         }
-        throw new Error(
-          'ElevenLabs is not configured. Please set ELEVENLABS_API_KEY in .env to enable ElevenLabs synthesis.'
-        );
       }
-      yield* elevenLabsTTS.synthesizeStream({ text, turnId, signal });
-      return;
     }
 
-    if (provider === 'mock') {
-      yield* this._mockSynthesizeStream({ text, turnId, signal });
-      return;
+    // 3. Test mode fallback stream
+    if (this._isTestMode() && !chunkEmitted) {
+      yield* this._mockSynthesizeStream({ text: normalizedText, turnId, signal });
     }
-
-    throw new Error(`Unsupported TTS provider: ${provider}`);
   }
 
   /**
-   * Isolated mock synthesizer used exclusively for unit testing environments.
+   * Mock synthesizer used in isolated unit test environments.
    */
   _mockSynthesize({ text, turnId }) {
     const sampleRate = 16000;
@@ -198,55 +317,50 @@ class TTSService {
       audioBuffer: wavBuffer,
       audioMimeType: 'audio/wav',
       isMock: true,
+      provider: 'mock',
       metrics: {
-        ttsApiLatencyMs: 12.5,
-        timeToFirstAudioChunkMs: 14.2,
-        totalAudioGenerationMs: 25.1,
+        ttsApiLatencyMs: 5.0,
+        timeToFirstAudioChunkMs: 5.0,
+        totalAudioGenerationMs: 10.0,
         totalBytes: wavBuffer.length,
+        chunkCount: 2,
       },
     };
   }
 
   async *_mockSynthesizeStream({ text, turnId, signal }) {
-    const full = this._mockSynthesize({ text, turnId });
-    const chunkSize = 1024;
-    const total = Math.ceil(full.audioBuffer.length / chunkSize);
-
-    for (let i = 0; i < total; i++) {
-      if (signal && signal.aborted) {
-        return;
-      }
-
-      await new Promise((r) => setTimeout(r, 15));
-
-      const start = i * chunkSize;
-      const end = Math.min(start + chunkSize, full.audioBuffer.length);
-      const chunk = full.audioBuffer.slice(start, end);
-
-      yield {
-        turnId,
-        chunkIndex: i,
-        data: chunk,
-        audioMimeType: 'audio/wav',
-        isFinal: false,
-        isMock: true,
-        metrics: {
-          ttsApiLatencyMs: 12.5,
-          timeToFirstAudioChunkMs: 14.2,
-          totalBytes: end,
-        },
-      };
-    }
+    const mockRes = this._mockSynthesize({ text, turnId });
+    const half = Math.floor(mockRes.audioBuffer.length / 2);
+    const chunk1 = mockRes.audioBuffer.subarray(0, half);
+    const chunk2 = mockRes.audioBuffer.subarray(half);
 
     yield {
       turnId,
-      chunkIndex: total,
-      data: Buffer.alloc(0),
+      chunkIndex: 0,
+      data: chunk1,
+      audioMimeType: 'audio/wav',
+      isFinal: false,
+      isMock: true,
+      provider: 'mock',
+      metrics: {
+        ...mockRes.metrics,
+        chunkIndex: 0,
+        bytes: chunk1.length,
+      },
+    };
+
+    yield {
+      turnId,
+      chunkIndex: 1,
+      data: chunk2,
       audioMimeType: 'audio/wav',
       isFinal: true,
       isMock: true,
+      provider: 'mock',
       metrics: {
-        ...full.metrics,
+        ...mockRes.metrics,
+        chunkIndex: 1,
+        bytes: chunk2.length,
       },
     };
   }
