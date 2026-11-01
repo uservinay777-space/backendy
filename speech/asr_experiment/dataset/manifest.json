@@ -1,0 +1,460 @@
+{
+  "dataset_name": "ASR-EN-HI-400H Subset (Milestone 6)",
+  "upstream_repository": "https://huggingface.co/datasets/fhai50032/asr-en-hi-400h",
+  "description": "Representative pilot subset for local ASR baseline evaluation and LoRA adapter fine-tuning.",
+  "leakage_quarantine_notice": "Contains intentionally tagged Lahaja, Svarah, and MUCS test samples to verify that DatasetLeakageFilter properly quarantines all evaluation benchmarks.",
+  "sample_rate": 16000,
+  "total_samples": 50,
+  "samples": [
+    {
+      "id": "iv_hi_001",
+      "source_dataset": "indicvoices_hindi",
+      "speaker_id": "spk_iv_01",
+      "language": "hi",
+      "duration_sec": 3.2,
+      "audio_path": "asr_experiment/dataset/audio/iv_hi_001.wav",
+      "raw_transcript": "कृपया कल सुबह नौ बजे का अलार्म लगा दीजिए"
+    },
+    {
+      "id": "iv_hi_002",
+      "source_dataset": "indicvoices_hindi",
+      "speaker_id": "spk_iv_01",
+      "language": "hi",
+      "duration_sec": 2.8,
+      "audio_path": "asr_experiment/dataset/audio/iv_hi_002.wav",
+      "raw_transcript": "आज का मौसम बहुत अच्छा और सुहावना है"
+    },
+    {
+      "id": "iv_hi_003",
+      "source_dataset": "indicvoices_hindi",
+      "speaker_id": "spk_iv_02",
+      "language": "hi",
+      "duration_sec": 4.1,
+      "audio_path": "asr_experiment/dataset/audio/iv_hi_003.wav",
+      "raw_transcript": "मुझे भारतीय रेल की समय सारणी की जानकारी चाहिए"
+    },
+    {
+      "id": "iv_hi_004",
+      "source_dataset": "indicvoices_hindi",
+      "speaker_id": "spk_iv_02",
+      "language": "hi",
+      "duration_sec": 3.5,
+      "audio_path": "asr_experiment/dataset/audio/iv_hi_004.wav",
+      "raw_transcript": "दवाइयों की दुकान कब तक खुली रहेगी"
+    },
+    {
+      "id": "iv_hi_005",
+      "source_dataset": "indicvoices_hindi",
+      "speaker_id": "spk_iv_03",
+      "language": "hi",
+      "duration_sec": 3.9,
+      "audio_path": "asr_experiment/dataset/audio/iv_hi_005.wav",
+      "raw_transcript": "नई दिल्ली से वाराणसी जाने वाली ट्रेन की स्थिति क्या है"
+    },
+    {
+      "id": "iv_hi_006",
+      "source_dataset": "indicvoices_hindi",
+      "speaker_id": "spk_iv_03",
+      "language": "hi",
+      "duration_sec": 2.6,
+      "audio_path": "asr_experiment/dataset/audio/iv_hi_006.wav",
+      "raw_transcript": "आपका बहुत बहुत धन्यवाद सहायता के लिए"
+    },
+    {
+      "id": "iv_hi_007",
+      "source_dataset": "indicvoices_hindi",
+      "speaker_id": "spk_iv_04",
+      "language": "hi",
+      "duration_sec": 3.4,
+      "audio_path": "asr_experiment/dataset/audio/iv_hi_007.wav",
+      "raw_transcript": "डॉक्टर के क्लिनिक का फोन नंबर मुझे बता दीजिए"
+    },
+    {
+      "id": "iv_hi_008",
+      "source_dataset": "indicvoices_hindi",
+      "speaker_id": "spk_iv_04",
+      "language": "hi",
+      "duration_sec": 4.0,
+      "audio_path": "asr_experiment/dataset/audio/iv_hi_008.wav",
+      "raw_transcript": "कृपया मेरा संदेश परिवार तक पहुंचा दीजिए"
+    },
+    {
+      "id": "kb_hi_001",
+      "source_dataset": "kathbath_hindi",
+      "speaker_id": "spk_kb_01",
+      "language": "hi",
+      "duration_sec": 3.0,
+      "audio_path": "asr_experiment/dataset/audio/kb_hi_001.wav",
+      "raw_transcript": "संसद भवन में आज महत्वपूर्ण विधेयक पारित हुआ"
+    },
+    {
+      "id": "kb_hi_002",
+      "source_dataset": "kathbath_hindi",
+      "speaker_id": "spk_kb_01",
+      "language": "hi",
+      "duration_sec": 3.8,
+      "audio_path": "asr_experiment/dataset/audio/kb_hi_002.wav",
+      "raw_transcript": "कृषि और उद्योग दोनों देश की अर्थव्यवस्था के आधार हैं"
+    },
+    {
+      "id": "kb_hi_003",
+      "source_dataset": "kathbath_hindi",
+      "speaker_id": "spk_kb_02",
+      "language": "hi",
+      "duration_sec": 4.2,
+      "audio_path": "asr_experiment/dataset/audio/kb_hi_003.wav",
+      "raw_transcript": "शिक्षा का अधिकार प्रत्येक बच्चे का मौलिक अधिकार है"
+    },
+    {
+      "id": "kb_hi_004",
+      "source_dataset": "kathbath_hindi",
+      "speaker_id": "spk_kb_02",
+      "language": "hi",
+      "duration_sec": 3.3,
+      "audio_path": "asr_experiment/dataset/audio/kb_hi_004.wav",
+      "raw_transcript": "डिजिटल इंडिया के अंतर्गत अनेक सेवाएं ऑनलाइन उपलब्ध हैं"
+    },
+    {
+      "id": "kb_hi_005",
+      "source_dataset": "kathbath_hindi",
+      "speaker_id": "spk_kb_03",
+      "language": "hi",
+      "duration_sec": 3.7,
+      "audio_path": "asr_experiment/dataset/audio/kb_hi_005.wav",
+      "raw_transcript": "पर्यावरण संरक्षण के लिए वृक्षारोपण अत्यंत आवश्यक है"
+    },
+    {
+      "id": "kb_hi_006",
+      "source_dataset": "kathbath_hindi",
+      "speaker_id": "spk_kb_03",
+      "language": "hi",
+      "duration_sec": 4.5,
+      "audio_path": "asr_experiment/dataset/audio/kb_hi_006.wav",
+      "raw_transcript": "वैज्ञानिक अनुसंधान से समाज में सकारात्मक बदलाव आते हैं"
+    },
+    {
+      "id": "kb_hi_007",
+      "source_dataset": "kathbath_hindi",
+      "speaker_id": "spk_kb_04",
+      "language": "hi",
+      "duration_sec": 3.1,
+      "audio_path": "asr_experiment/dataset/audio/kb_hi_007.wav",
+      "raw_transcript": "राष्ट्रीय राजमार्ग पर यातायात सामान्य रूप से चल रहा है"
+    },
+    {
+      "id": "kb_hi_008",
+      "source_dataset": "kathbath_hindi",
+      "speaker_id": "spk_kb_04",
+      "language": "hi",
+      "duration_sec": 2.9,
+      "audio_path": "asr_experiment/dataset/audio/kb_hi_008.wav",
+      "raw_transcript": "जल संरक्षण जीवन के लिए सर्वाधिक महत्वपूर्ण है"
+    },
+    {
+      "id": "vn_hi_001",
+      "source_dataset": "vaani_hindi",
+      "speaker_id": "spk_vn_01",
+      "language": "hi",
+      "duration_sec": 3.6,
+      "audio_path": "asr_experiment/dataset/audio/vn_hi_001.wav",
+      "raw_transcript": "हमरे यहां कल रात से बहुत तेज बारिश हो रही है"
+    },
+    {
+      "id": "vn_hi_002",
+      "source_dataset": "vaani_hindi",
+      "speaker_id": "spk_vn_01",
+      "language": "hi",
+      "duration_sec": 2.7,
+      "audio_path": "asr_experiment/dataset/audio/vn_hi_002.wav",
+      "raw_transcript": "मंडी में गेहूं का भाव क्या चल रहा है"
+    },
+    {
+      "id": "vn_hi_003",
+      "source_dataset": "vaani_hindi",
+      "speaker_id": "spk_vn_02",
+      "language": "hi",
+      "duration_sec": 4.0,
+      "audio_path": "asr_experiment/dataset/audio/vn_hi_003.wav",
+      "raw_transcript": "अस्पताल जाने के लिए कोई सवारी मिलेगी क्या"
+    },
+    {
+      "id": "vn_hi_004",
+      "source_dataset": "vaani_hindi",
+      "speaker_id": "spk_vn_02",
+      "language": "hi",
+      "duration_sec": 3.2,
+      "audio_path": "asr_experiment/dataset/audio/vn_hi_004.wav",
+      "raw_transcript": "बिजली का बिल भरने की अंतिम तिथि कब है"
+    },
+    {
+      "id": "vn_hi_005",
+      "source_dataset": "vaani_hindi",
+      "speaker_id": "spk_vn_03",
+      "language": "hi",
+      "duration_sec": 3.5,
+      "audio_path": "asr_experiment/dataset/audio/vn_hi_005.wav",
+      "raw_transcript": "पोस्ट ऑफिस में पार्सल कब तक पहुंचेगा"
+    },
+    {
+      "id": "vn_hi_006",
+      "source_dataset": "vaani_hindi",
+      "speaker_id": "spk_vn_03",
+      "language": "hi",
+      "duration_sec": 2.8,
+      "audio_path": "asr_experiment/dataset/audio/vn_hi_006.wav",
+      "raw_transcript": "राशन कार्ड के लिए कौन से दस्तावेज चाहिए"
+    },
+    {
+      "id": "vn_hi_007",
+      "source_dataset": "vaani_hindi",
+      "speaker_id": "spk_vn_04",
+      "language": "hi",
+      "duration_sec": 4.3,
+      "audio_path": "asr_experiment/dataset/audio/vn_hi_007.wav",
+      "raw_transcript": "आधार कार्ड में मोबाइल नंबर कैसे लिंक करवाएं"
+    },
+    {
+      "id": "vn_hi_008",
+      "source_dataset": "vaani_hindi",
+      "speaker_id": "spk_vn_04",
+      "language": "hi",
+      "duration_sec": 3.0,
+      "audio_path": "asr_experiment/dataset/audio/vn_hi_008.wav",
+      "raw_transcript": "बैंक शाखा शनिवार को खुली रहती है या नहीं"
+    },
+    {
+      "id": "hg_conv_001",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_01",
+      "language": "hi-en",
+      "duration_sec": 3.8,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_001.wav",
+      "raw_transcript": "Mujhe Delhi se Mumbai ke liye Rajdhani express book karna hai"
+    },
+    {
+      "id": "hg_conv_002",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_01",
+      "language": "hi-en",
+      "duration_sec": 3.1,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_002.wav",
+      "raw_transcript": "PNR status check karke bataiye train confirm hui ya nahi"
+    },
+    {
+      "id": "hg_conv_003",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_02",
+      "language": "hi-en",
+      "duration_sec": 4.2,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_003.wav",
+      "raw_transcript": "Kal sham ko Doctor Sharma ke sath consultation slot available hai"
+    },
+    {
+      "id": "hg_conv_004",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_02",
+      "language": "hi-en",
+      "duration_sec": 3.4,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_004.wav",
+      "raw_transcript": "Appointment reschedule karke Friday ko three PM kar dijiye"
+    },
+    {
+      "id": "hg_conv_005",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_03",
+      "language": "hi-en",
+      "duration_sec": 4.0,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_005.wav",
+      "raw_transcript": "Platform number three par konsi train aane wali hai abhi"
+    },
+    {
+      "id": "hg_conv_006",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_03",
+      "language": "hi-en",
+      "duration_sec": 3.3,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_006.wav",
+      "raw_transcript": "Mera payment account se deduct ho gaya par booking pending hai"
+    },
+    {
+      "id": "hg_conv_007",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_04",
+      "language": "hi-en",
+      "duration_sec": 3.7,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_007.wav",
+      "raw_transcript": "Tatkal quota mein ticket milne ke chances kitne hain"
+    },
+    {
+      "id": "hg_conv_008",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_04",
+      "language": "hi-en",
+      "duration_sec": 4.4,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_008.wav",
+      "raw_transcript": "General ward appointment chahiye ya specialist consultation book karein"
+    },
+    {
+      "id": "hg_conv_009",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_05",
+      "language": "hi-en",
+      "duration_sec": 3.5,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_009.wav",
+      "raw_transcript": "Please confirm my railway ticket for AC three tier coach"
+    },
+    {
+      "id": "hg_conv_010",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_05",
+      "language": "hi-en",
+      "duration_sec": 2.9,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_010.wav",
+      "raw_transcript": "Doctor ka prescription WhatsApp par share kar sakte hain"
+    },
+    {
+      "id": "hg_conv_011",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_06",
+      "language": "hi-en",
+      "duration_sec": 3.6,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_011.wav",
+      "raw_transcript": "Can you cancel my appointment and process the refund"
+    },
+    {
+      "id": "hg_conv_012",
+      "source_dataset": "hinglish_conversational",
+      "speaker_id": "spk_hg_06",
+      "language": "hi-en",
+      "duration_sec": 4.1,
+      "audio_path": "asr_experiment/dataset/audio/hg_conv_012.wav",
+      "raw_transcript": "Agli train Howrah ke liye kab depart hogi New Delhi se"
+    },
+    {
+      "id": "ps_en_001",
+      "source_dataset": "peoples_speech_english",
+      "speaker_id": "spk_ps_01",
+      "language": "en",
+      "duration_sec": 3.0,
+      "audio_path": "asr_experiment/dataset/audio/ps_en_001.wav",
+      "raw_transcript": "Please verify the transaction details on your screen"
+    },
+    {
+      "id": "ps_en_002",
+      "source_dataset": "peoples_speech_english",
+      "speaker_id": "spk_ps_01",
+      "language": "en",
+      "duration_sec": 3.5,
+      "audio_path": "asr_experiment/dataset/audio/ps_en_002.wav",
+      "raw_transcript": "The customer service representative will connect shortly"
+    },
+    {
+      "id": "ps_en_003",
+      "source_dataset": "peoples_speech_english",
+      "speaker_id": "spk_ps_02",
+      "language": "en",
+      "duration_sec": 4.2,
+      "audio_path": "asr_experiment/dataset/audio/ps_en_003.wav",
+      "raw_transcript": "Our team is investigating the delayed delivery of your parcel"
+    },
+    {
+      "id": "ps_en_004",
+      "source_dataset": "peoples_speech_english",
+      "speaker_id": "spk_ps_02",
+      "language": "en",
+      "duration_sec": 2.8,
+      "audio_path": "asr_experiment/dataset/audio/ps_en_004.wav",
+      "raw_transcript": "Thank you for contacting customer support today"
+    },
+    {
+      "id": "ps_en_005",
+      "source_dataset": "peoples_speech_english",
+      "speaker_id": "spk_ps_03",
+      "language": "en",
+      "duration_sec": 3.9,
+      "audio_path": "asr_experiment/dataset/audio/ps_en_005.wav",
+      "raw_transcript": "You can check your appointment schedule on the mobile app"
+    },
+    {
+      "id": "ps_en_006",
+      "source_dataset": "peoples_speech_english",
+      "speaker_id": "spk_ps_03",
+      "language": "en",
+      "duration_sec": 3.3,
+      "audio_path": "asr_experiment/dataset/audio/ps_en_006.wav",
+      "raw_transcript": "Please enter your ten digit registered phone number"
+    },
+    {
+      "id": "lhj_bho_001",
+      "source_dataset": "lahaja_hindi",
+      "speaker_id": "spk_lhj_01",
+      "language": "hi",
+      "duration_sec": 3.5,
+      "audio_path": "asr_experiment/dataset/audio/lhj_bho_001.wav",
+      "raw_transcript": "हमार घरवा में आज सब लोग बहरा गइल बा"
+    },
+    {
+      "id": "lhj_hnd_002",
+      "source_dataset": "lahaja_hindi",
+      "speaker_id": "spk_lhj_02",
+      "language": "hi",
+      "duration_sec": 4.0,
+      "audio_path": "asr_experiment/dataset/audio/lhj_hnd_002.wav",
+      "raw_transcript": "दुकान से कुछ सामान ले आने को कहा था"
+    },
+    {
+      "id": "lhj_awa_003",
+      "source_dataset": "lahaja_hindi",
+      "speaker_id": "spk_lhj_03",
+      "language": "hi",
+      "duration_sec": 3.2,
+      "audio_path": "asr_experiment/dataset/audio/lhj_awa_003.wav",
+      "raw_transcript": "हमरे घरे आज बहुत मेहमान आए हैं"
+    },
+    {
+      "id": "svarah_ind_001",
+      "source_dataset": "svarah_english",
+      "speaker_id": "spk_sv_01",
+      "language": "en",
+      "duration_sec": 3.6,
+      "audio_path": "asr_experiment/dataset/audio/svarah_ind_001.wav",
+      "raw_transcript": "The meeting has been rescheduled to tomorrow afternoon"
+    },
+    {
+      "id": "svarah_ind_002",
+      "source_dataset": "svarah_english",
+      "speaker_id": "spk_sv_02",
+      "language": "en",
+      "duration_sec": 4.1,
+      "audio_path": "asr_experiment/dataset/audio/svarah_ind_002.wav",
+      "raw_transcript": "Could you please send me the annual financial report"
+    },
+    {
+      "id": "svarah_ind_003",
+      "source_dataset": "svarah_english",
+      "speaker_id": "spk_sv_03",
+      "language": "en",
+      "duration_sec": 3.0,
+      "audio_path": "asr_experiment/dataset/audio/svarah_ind_003.wav",
+      "raw_transcript": "I have received the confirmation code on my device"
+    },
+    {
+      "id": "mucs_test_9001",
+      "source_dataset": "mucs_2021",
+      "speaker_id": "spk_mc_01",
+      "language": "hi-en",
+      "duration_sec": 3.7,
+      "audio_path": "asr_experiment/dataset/audio/mucs_test_9001.wav",
+      "raw_transcript": "Main railway station ke bahar aapka wait kar raha hoon"
+    },
+    {
+      "id": "mucs_test_9002",
+      "source_dataset": "mucs_2021",
+      "speaker_id": "spk_mc_02",
+      "language": "hi-en",
+      "duration_sec": 4.0,
+      "audio_path": "asr_experiment/dataset/audio/mucs_test_9002.wav",
+      "raw_transcript": "Flight delayed hai isliye train se aana padega"
+    }
+  ]
+}

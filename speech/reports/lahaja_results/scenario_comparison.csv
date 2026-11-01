@@ -1,0 +1,3 @@
+scenario,sample_count,speaker_count,total_ref_words,corpus_wer,corpus_cer,macro_wer,avg_latency_ms,success_rate_pct
+extempore,16,16,161,0.018634,0.004637,0.01875,12.0,100.0
+read,19,19,220,0.0,0.0,0.0,10.0,100.0

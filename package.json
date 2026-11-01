@@ -1,0 +1,23 @@
+{
+  "name": "phantomflow-backend",
+  "version": "1.0.0",
+  "description": "PhantomFlow Voice Intelligence Backend - Node.js Express & Python FastAPI Services",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev": "npm --prefix backend run dev",
+    "test": "npm --prefix backend test",
+    "python:start": "PYTHONPATH=src uvicorn phantomflow.server:app --host 0.0.0.0 --port ${PORT:-8000}",
+    "python:test": "pytest -q"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "groq-sdk": "^0.15.0",
+    "mongodb": "^6.13.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

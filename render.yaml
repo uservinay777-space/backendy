@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: phantomflow-orchestrator
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r requirements.txt websockets uvicorn fastapi"
+    startCommand: "PYTHONPATH=src uvicorn phantomflow.server:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHONPATH
+        value: src
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: openai/gpt-oss-120b
+
+  - type: web
+    name: phantomflow-conversation-engine
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GROQ_API_KEY
+        sync: false
+      - key: MONGODB_URI
+        sync: false

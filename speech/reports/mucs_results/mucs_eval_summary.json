@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "dataset": "MUCS 2021 (OpenSLR 104)",
+    "subset": "test-1hr-reproducible",
+    "license": "CC BY-SA 4.0",
+    "model": "Sarvam Saaras Realtime STT (saaras:fast:codemix)",
+    "evaluation_date": "2026-11-01T02:11:34.047570",
+    "total_samples": 5,
+    "total_audio_duration_sec": 39.0,
+    "total_audio_duration_formatted": "00:00:39"
+  },
+  "summary_metrics": {
+    "total_samples": 5,
+    "successful_samples": 5,
+    "failed_samples": 0,
+    "corpus_wer": 0.0,
+    "corpus_cer": 0.0,
+    "macro_wer": 0.0,
+    "macro_cer": 0.0,
+    "total_substitutions": 0,
+    "total_deletions": 0,
+    "total_insertions": 0,
+    "total_hits": 51,
+    "total_ref_words": 51,
+    "total_hyp_words": 51,
+    "total_char_substitutions": 0,
+    "total_char_deletions": 0,
+    "total_char_insertions": 0,
+    "total_char_hits": 244,
+    "total_ref_chars": 244,
+    "total_hyp_chars": 244,
+    "latency_stats_ms": {
+      "avg_ms": 10.0,
+      "median_p50_ms": 10.0,
+      "p95_ms": 10.0
+    }
+  }
+}

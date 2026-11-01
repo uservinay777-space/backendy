@@ -1,0 +1,30 @@
+{
+  "name": "phantomflow-conversation-engine",
+  "version": "1.0.0",
+  "description": "AI Conversation Engine and Backend for PhantomFlow (Track 02: Real-time Hinglish Voice Assistant)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [
+    "phantomflow",
+    "voice-assistant",
+    "hinglish",
+    "railway",
+    "fast-lane",
+    "smart-path"
+  ],
+  "author": "Member 3 - AI Conversation & Backend Engineer",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "elevenlabs": "^1.59.0",
+    "express": "^4.21.2",
+    "groq-sdk": "^1.6.0",
+    "mongodb": "^7.8.0",
+    "railkit": "^6.0.2"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "dataset_name": "ASR-EN-HI-400H",
+  "huggingface_repo": "fhai50032/asr-en-hi-400h",
+  "combined_license_designation": "other",
+  "leakage_prevention_policy": "Strict exclusion of public benchmark evaluation sets (Lahaja and Svarah) and official MUCS test audio from any training or tuning stage.",
+  "sources": {
+    "indicvoices_hindi": {
+      "display_name": "IndicVoices (Hindi)",
+      "curator": "AI4Bharat (IIT Madras)",
+      "primary_language": "hi",
+      "license": "CC BY 4.0",
+      "commercial_use_permitted": true,
+      "eligibility": "TRAIN_PERMITTED",
+      "citation": "IndicVoices: A Large-scale Multi-dialectal Speech Dataset for Indian Languages"
+    },
+    "kathbath_hindi": {
+      "display_name": "Kathbath (Hindi)",
+      "curator": "AI4Bharat (IIT Madras)",
+      "primary_language": "hi",
+      "license": "CC BY 4.0",
+      "commercial_use_permitted": true,
+      "eligibility": "TRAIN_PERMITTED",
+      "citation": "Kathbath: A crowdsourced speech dataset for Indian languages"
+    },
+    "vaani_hindi": {
+      "display_name": "Project Vaani (Hindi)",
+      "curator": "Indian Institute of Science (IISc) / ARTPARK / Google",
+      "primary_language": "hi",
+      "license": "CC BY 4.0",
+      "commercial_use_permitted": true,
+      "eligibility": "TRAIN_PERMITTED",
+      "citation": "Project Vaani: Spoken Dialect Corpus for Indian Languages"
+    },
+    "hinglish_conversational": {
+      "display_name": "Hinglish Conversational Speech",
+      "curator": "Academic / Open-Source Contributors",
+      "primary_language": "hi-en",
+      "license": "CC BY-SA 4.0",
+      "commercial_use_permitted": true,
+      "eligibility": "TRAIN_PERMITTED",
+      "citation": "Multilingual Code-Switching Speech Recognition Challenge Corpus"
+    },
+    "ami_english": {
+      "display_name": "AMI Meeting Corpus (English)",
+      "curator": "AMI Consortium",
+      "primary_language": "en",
+      "license": "CC BY 4.0",
+      "commercial_use_permitted": true,
+      "eligibility": "TRAIN_PERMITTED",
+      "citation": "The AMI Meeting Corpus: A Multi-modal Dataset for Meeting Analysis"
+    },
+    "peoples_speech_english": {
+      "display_name": "The People's Speech (English)",
+      "curator": "MLCommons Association",
+      "primary_language": "en",
+      "license": "CC BY-SA 4.0",
+      "commercial_use_permitted": true,
+      "eligibility": "TRAIN_PERMITTED",
+      "citation": "The People's Speech: A 30,000-Hour Diverse Multilingual Speech Dataset"
+    },
+    "voxpopuli_english": {
+      "display_name": "VoxPopuli (English)",
+      "curator": "Meta AI",
+      "primary_language": "en",
+      "license": "CC0 (Public Domain)",
+      "commercial_use_permitted": true,
+      "eligibility": "TRAIN_PERMITTED",
+      "citation": "VoxPopuli: A Large-Scale Multilingual Speech Corpus for Representation Learning"
+    },
+    "lahaja_hindi": {
+      "display_name": "Lahaja (Hindi Accents)",
+      "curator": "AI4Bharat (IIT Madras)",
+      "primary_language": "hi",
+      "license": "CC BY-NC-SA 4.0",
+      "commercial_use_permitted": false,
+      "eligibility": "EXCLUDED_TEST_SET",
+      "exclusion_reason": "CRITICAL BENCHMARK LEAKAGE PREVENTION: Lahaja is an active independent evaluation benchmark for PhantomFlow (Milestone 5). Training on Lahaja would contaminate evaluation scores.",
+      "citation": "Lahaja: A Multidialectal Speech Dataset for Indian Languages"
+    },
+    "svarah_english": {
+      "display_name": "Svarah (Indian English)",
+      "curator": "IIT Bombay",
+      "primary_language": "en-IN",
+      "license": "Research Only",
+      "commercial_use_permitted": false,
+      "eligibility": "EXCLUDED_TEST_SET",
+      "exclusion_reason": "CRITICAL BENCHMARK LEAKAGE PREVENTION: Svarah is identified as a public evaluation benchmark set. Excluded from training.",
+      "citation": "Svarah: Indian English Accented Speech Recognition Evaluation Dataset"
+    }
+  }
+}
+

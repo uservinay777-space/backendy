@@ -1,0 +1,50 @@
+# PhantomFlow ASR Fine-Tuning Experiment Configuration
+experiment_name: "phantomflow_local_asr_pilot"
+model_architecture: "whisper-small-lora"
+pretrained_checkpoint: "openai/whisper-small"
+
+hardware:
+  device: "auto"               # 'mps' on Apple Silicon, 'cuda' on Nvidia, 'cpu' fallback
+  precision: "fp32"            # 'fp16' or 'fp32'
+  max_memory_gb: 8.0
+
+dataset:
+  manifest_path: "speech/asr_experiment/dataset/manifest.json"
+  sample_rate: 16000
+  target_audio_duration_sec: 15.0
+  n_mels: 80
+  leakage_prevention:
+    exclude_lahaja: true
+    exclude_svarah: true
+    exclude_mucs_test: true
+
+splits:
+  train_ratio: 0.80
+  val_ratio: 0.10
+  test_ratio: 0.10
+  speaker_aware_split: true
+  random_seed: 42
+
+training:
+  stage: "pilot"               # 'baseline', 'pilot', 'scaled'
+  max_epochs: 3
+  batch_size: 4
+  gradient_accumulation_steps: 2
+  learning_rate: 0.0003
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  lora:
+    enabled: true
+    r: 16
+    lora_alpha: 32
+    target_modules: ["q_proj", "v_proj"]
+    dropout: 0.05
+  early_stopping_patience: 2
+
+checkpoints:
+  save_dir: "speech/asr_experiment/checkpoints"
+  save_every_epoch: true
+  best_metric: "val_wer"
+
+reports:
+  output_dir: "speech/asr_experiment/reports"

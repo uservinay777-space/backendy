@@ -1,0 +1,4 @@
+epoch,train_loss,val_loss,val_wer,val_cer,learning_rate,step_duration_sec,checkpoint_saved
+1,4.4468,0.0,0.0,0.0,0.0003,0.31,True
+2,4.4354,0.0,0.0,0.0,0.0003,0.11,True
+3,4.4241,0.0,0.0,0.0,0.0003,0.11,True

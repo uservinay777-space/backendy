@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhantomFlow — Real-Time Hinglish Voice Hotline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Ambient background lighting -->
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-purple"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-badge">
+          <span class="ghost-icon">👻</span>
+          <div class="logo-titles">
+            <h1>PHANTOMFLOW</h1>
+            <span class="subtitle">Track 02 — The Midnight Phantom Hotline</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="server-status" id="serverStatusBadge">
+          <span class="status-dot"></span>
+          <span class="status-text" id="statusText">Connecting...</span>
+        </div>
+        <div class="session-pill">
+          <span class="session-label">SESSION:</span>
+          <span class="session-id" id="sessionIdDisplay">session_demo_01</span>
+          <button id="resetSessionBtn" class="btn-icon" title="Reset Session Context">🔄</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-grid">
+      <!-- Left Column: Voice Terminal & Dialogue Stream -->
+      <section class="terminal-panel">
+        <!-- Voice Interactive Center -->
+        <div class="voice-center-card">
+          <div class="voice-visualizer-container">
+            <canvas id="waveformCanvas" width="400" height="70"></canvas>
+            <div class="voice-state-label" id="voiceStateLabel">Ready to listen • Tap mic or speak</div>
+          </div>
+
+          <div class="voice-action-bar">
+            <button id="micBtn" class="mic-button" title="Start / Stop Speaking">
+              <span class="mic-icon">🎙️</span>
+              <span class="mic-pulse"></span>
+            </button>
+            <div class="voice-controls">
+              <div class="toggle-control">
+                <input type="checkbox" id="autoTtsToggle" checked>
+                <label for="autoTtsToggle">Auto-Speak (TTS)</label>
+              </div>
+              <div class="voice-select-wrap">
+                <select id="ttsProviderSelect" class="voice-select" title="Select Voice TTS Engine">
+                  <option value="sarvam" selected>🇮🇳 Sarvam AI Bulbul v4 Flash (Primary)</option>
+                  <option value="elevenlabs">✨ ElevenLabs Flash v2.5 (Optional)</option>
+                  <option value="webspeech">🌐 Browser Voice (Local Device)</option>
+                </select>
+              </div>
+              <div class="voice-select-wrap">
+                <select id="voiceLanguageSelect" class="voice-select">
+                  <option value="en-IN">Hinglish / Indian English (en-IN)</option>
+                  <option value="hi-IN">Hindi (hi-IN)</option>
+                  <option value="en-US">English (en-US)</option>
+                </select>
+              </div>
+              <button id="interruptAudioBtn" class="btn-interrupt" title="GhostBarge: Halt Assistant Audio">
+                🛑 Halt Audio
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dialogue Stream -->
+        <div class="dialogue-scroll-box" id="dialogueContainer">
+          <!-- Initial welcome card -->
+          <div class="message-card assistant">
+            <div class="message-meta">
+              <span class="sender-tag">👻 PHANTOM OPERATOR</span>
+              <span class="time-tag">Just now</span>
+              <span class="path-badge badge-fast">⚡ FAST LANE (0.8ms)</span>
+            </div>
+            <div class="message-text">
+              Namaste! Main PhantomFlow Indian Railway voice assistant hoon. Aap mujhse trains search, running status, ya railway rules ke baare mein Hindi, English ya Hinglish mein pooch sakte hain.
+            </div>
+            <button class="speak-again-btn" id="welcomeSpeakBtn" title="Replay Audio">🔊 Speak</button>
+          </div>
+        </div>
+
+        <!-- Quick Test Chips -->
+        <div class="quick-chips-wrapper">
+          <span class="chips-title">QUICK PROMPTS:</span>
+          <div class="chips-scroll">
+            <button class="chip-btn" data-text="Mujhe Bengaluru se Chennai jaana hai Saturday morning">🚆 Bengaluru ➔ Chennai (Sat)</button>
+            <button class="chip-btn chip-accent" data-text="Actually Sunday ko jaana hai">🔄 Actually Sunday (SwitchSync)</button>
+            <button class="chip-btn" data-text="Change destination to Pune">📍 Change to Pune</button>
+            <button class="chip-btn" data-text="Tatkal booking timing kya hai?">⏱️ Tatkal Timing FAQ</button>
+            <button class="chip-btn" data-text="Train 12028 running status">📡 Train 12028 Status</button>
+            <button class="chip-btn chip-smart" data-text="Can you explain which doctor to consult for acute chest pain?">🧠 Medical Query (Smart Path)</button>
+          </div>
+        </div>
+
+        <!-- Text Input & Send -->
+        <form class="input-form" id="chatForm">
+          <input 
+            type="text" 
+            id="textInput" 
+            class="chat-input" 
+            placeholder="Type your railway query in Hinglish or tap the mic..."
+            autocomplete="off"
+          />
+          <button type="submit" id="sendBtn" class="send-button">
+            <span>Send</span>
+            <span class="send-arrow">➔</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Right Column: SwitchSync Inspector & Live Telemetry -->
+      <aside class="telemetry-panel">
+        <!-- SwitchSync Context Inspector -->
+        <div class="card telemetry-card">
+          <div class="card-header">
+            <h3>🧩 SwitchSync Slot Inspector</h3>
+            <span class="live-pill">LIVE STATE</span>
+          </div>
+          <p class="card-desc">Non-destructive memory retention preserving active slots during mid-sentence corrections.</p>
+          
+          <div class="slots-grid">
+            <div class="slot-box" id="slotOrigin">
+              <span class="slot-label">ORIGIN</span>
+              <span class="slot-value" id="valOrigin">—</span>
+            </div>
+            <div class="slot-box" id="slotDestination">
+              <span class="slot-label">DESTINATION</span>
+              <span class="slot-value" id="valDestination">—</span>
+            </div>
+            <div class="slot-box" id="slotDate">
+              <span class="slot-label">TRAVEL DATE</span>
+              <span class="slot-value" id="valDate">—</span>
+            </div>
+            <div class="slot-box" id="slotTime">
+              <span class="slot-label">TIME SLOT</span>
+              <span class="slot-value" id="valTime">—</span>
+            </div>
+            <div class="slot-box" id="slotTrainNumber">
+              <span class="slot-label">TRAIN NO.</span>
+              <span class="slot-value" id="valTrainNumber">—</span>
+            </div>
+            <div class="slot-box" id="slotPnr">
+              <span class="slot-label">PNR</span>
+              <span class="slot-value" id="valPnr">—</span>
+            </div>
+          </div>
+
+          <div class="missing-fields-box" id="missingFieldsContainer" style="display: none;">
+            <span class="alert-icon">⚠️</span>
+            <span class="missing-text" id="missingFieldsText">Pending info: destination</span>
+          </div>
+        </div>
+
+        <!-- Latency & Processing Path Telemetry -->
+        <div class="card telemetry-card">
+          <div class="card-header">
+            <h3>⚡ Latency & Routing Telemetry</h3>
+            <span class="badge-curse" id="curseTargetBadge">Target: &lt;600ms</span>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-block">
+              <span class="metric-label">LAST TURN LATENCY</span>
+              <div class="metric-val-wrap">
+                <span class="metric-number" id="metricLatency">0.8</span>
+                <span class="metric-unit">ms</span>
+              </div>
+            </div>
+            <div class="metric-block">
+              <span class="metric-label">PROCESSING ROUTE</span>
+              <span class="route-badge badge-fast" id="metricRoute">⚡ FAST LANE</span>
+            </div>
+          </div>
+
+          <div class="meta-details-list">
+            <div class="meta-row">
+              <span class="meta-key">Detected Intent:</span>
+              <span class="meta-val" id="metricIntent">railway_search</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-key">Detected Language:</span>
+              <span class="meta-val" id="metricLang">hinglish</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-key">Midnight Curse Check:</span>
+              <span class="meta-val text-success" id="metricCurseCheck">✅ PASS (&lt; 600ms)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Architecture Quick Info -->
+        <div class="card info-card">
+          <h4>💡 Hackathon Track 02 Specs</h4>
+          <ul class="specs-list">
+            <li><strong>Member 1:</strong> Central Orchestrator & LiveKit Room</li>
+            <li><strong>Member 2:</strong> Sarvam Saaras STT & Bulbul Flash TTS</li>
+            <li><strong>Member 3:</strong> Hinglish NLP, SwitchSync & Fast Lane</li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
